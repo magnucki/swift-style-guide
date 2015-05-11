@@ -93,4 +93,74 @@ subscript(index: Int) -> T {
 _Begründung:_ Der Sinn und Zweck des oberen Codes ist auch ohne `get` Schlüsselwort klar. Somit kann der Code reduziert werden.
 
 
-#### Expilizite Spezifizierung der Zugriffsrechte für Definitionen der höchsten Ebene
+#### Expilizite Spezifizierung der Zugriffsrechte für top-level Definitionen
+
+Top-level Funktionen, Typen und Variablen sollten immer einen explizite Spezifikation von Zugriffsrechten erhalten.
+
+```swift
+public var whoopsGlobalState: Int
+internal struct TheFez {}
+private func doTheThings(things: [Thing]) {}
+```
+
+Zugriffsrechte unter dem top-level können weiterhin implizit definiert werden:
+
+```swift
+internal struct TheFez {
+	var owner: Person = Joshaber()
+}
+```
+
+_Begründung:_ In der Regel ist es nicht angebracht, top-level Defintionen als `internal` zu spezifizieren. Durch die explizite Angabe kann sichergestellt werden, dass sich genaue Gedanken über die Zugriffsrechte gemacht wurden. Eine erneute Angabe innerhalb der Funktion wäre redundant, da hier der Standardfall normalerweise sinnvoll ist.
+
+#### Verknüpfen des Doppelpunkts mit dem Identifikator
+
+Wird der Typ eines Identifikators spezifiziert, folgt direkt der Doppelpunkt. Anschließend wird - separiert mit einem Leerzeichen - der Names des Typs angefügt.
+
+```swift
+class SmallBatchSustainableFairtrade: Coffee { ... }
+
+let timeToCoffee: NSTimeInterval = 2
+
+func makeCoffee(type: CoffeeType) -> Coffee { ... }
+```
+
+_Begründung:_ Der Spezifikator des Typs sagt etwas über den _Identifikator_ aus und sollte somit auch an diesem Positioniert werden.
+
+Gleiches gilt auch für die Spezifikation des Typs eines Dictionaries. Hier folgt der Doppelpunkt direkt auf den Typ des Schlüssels, gefolgt von einem Leerzeichen und dem Wert.
+
+```swift
+let capitals: [Country: City] = [ Sweden: Stockholm ]
+```
+
+#### Explizite Verwendung von `self` nur wenn es nötig ist
+
+Wenn mit Eigenschaften von `self` gearbeitet wird, sollte auf die Referenz von `self` verzichtet werden.
+
+```swift
+private class History {
+	var events: [Event]
+
+	func rewrite() {
+		events = []
+	}
+}
+```
+
+`self` sollte nur dann verwendet werden, wenn die Sprache es verlangt, beispielsweise in closures oder wenn es zu Bennenungskonflikten bei Parametern kommt.
+
+```swift
+extension History {
+	init(events: [Event]) {
+		self.events = events
+	}
+
+	var whenVictorious: () -> () {
+		return {
+			self.rewrite()
+		}
+	}
+}
+```
+
+_Begründung:_ Die kapselnde Semantik von `self` wird stärker herausgestellt und macht closures bessers lesbar. Außerdem wird unnötig aufwendiger Code vermieden.
