@@ -175,7 +175,7 @@ _Rationale:_ This makes the capturing semantics of `self` stand out more in clos
 
 #### Prefer structs over classes
 
-Unless you require functionality that can only be provided by a class (like identity or deinitializers), implement a struct instead.
+Unless you require functionality that can only be provided by a class (like identity or deinitializers), implement a struct instead. 
 
 Note that inheritance is (by itself) usually _not_ a good reason to use classes, because polymorphism can be provided by protocols, and implementation reuse can be provided through composition.
 
@@ -284,3 +284,5 @@ _Rationale:_ Operators consist of punctuation characters, which can make them di
 
 * [中文版](https://github.com/Artwalk/swift-style-guide/blob/master/README_CN.md)
 * [日本語版](https://github.com/jarinosuke/swift-style-guide/blob/master/README_JP.md)
+* [German](https://github.com/magnucki/swift-style-guide/blob/master/README_DE.md)
+	

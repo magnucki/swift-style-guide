@@ -164,3 +164,108 @@ extension History {
 ```
 
 _Begründung:_ Die kapselnde Semantik von `self` wird stärker herausgestellt und macht closures bessers lesbar. Außerdem wird unnötig aufwendiger Code vermieden.
+
+#### Präferiere structs nichts Klassen
+
+Sofern keine Funktionalität benötig wird, die nur von Klassen bereitgestellt werden kann (beispielsweise Identität oder Deinitialisierung), sollte ein struct implementiert werden.
+
+Dabei sollte bedacht werden, dass Vererbung in der Regel _kein_ guter Grund ist, um Klassen zu verwenden. Polymorphismen können auch von Protokollen bereitgestellt werden und die Wiederverwendung von Implementationen wird durch Kompositionen bereitgestellt. 
+
+Angenommen die vorliegende Hierarchie sei gegeben:
+
+```swift
+class Vehicle {
+    let numberOfWheels: Int
+
+    init(numberOfWheels: Int) {
+        self.numberOfWheels = numberOfWheels
+    }
+
+    func maximumTotalTirePressure(pressurePerWheel: Float) -> Float {
+        return pressurePerWheel * numberOfWheels
+    }
+}
+
+class Bicycle: Vehicle {
+    init() {
+        super.init(numberOfWheels: 2)
+    }
+}
+
+class Car: Vehicle {
+    init() {
+        super.init(numberOfWheels: 4)
+    }
+}
+```
+
+Dann kann diese wie folgt refaktorisiert werden: 
+
+```swift
+protocol Vehicle {
+    var numberOfWheels: Int { get }
+}
+
+func maximumTotalTirePressure(vehicle: Vehicle, pressurePerWheel: Float) -> Float {
+    return pressurePerWheel * vehicle.numberOfWheels
+}
+
+struct Bicycle: Vehicle {
+    let numberOfWheels = 2
+}
+
+struct Car: Vehicle {
+    let numberOfWheels = 4
+}
+```
+
+_Begründung:_ Value Typen sind einfacher, besser zu verstehen und zeigen das gewünschte Verhalten in Kombination mit dem `let` Schlüsselwort
+
+## Klassen normalweise als `final` deklarieren
+
+Klassen sollten generell als `final` deklariert werden. Verzichtet wird darauf nur, um Vererbung zu ermöglichen, sofern dafür ein triftiger Grund vorhanden ist. Dann sollte dennoch darauf geachtet werden, dass möglichst viele definitionen _innerhalb_ der Klasse als `final` gekennzeichnet werden. 
+
+_Begründung:_ Im Allgemeinen werden Kompositionen der Vererbung vorgezogen. Eine Entscheidung für Vererbung lässt hoffentlich darauf schließen, dass über diese Entscheidung genauer nachgedacht wurde.
+
+## Verzicht auf Typparameter
+
+Methoden, die auf parametrisierten Typen arbeiten, können auf Typparameter verzichten, wenn der Typ der gleiche ist, wie der des Empfängers. Beispiel:
+
+```swift
+struct Composite<T> {
+    …
+    func compose(other: Composite<T>) -> Composite<T> {
+        return Composite<T>(self, other)
+    }
+}
+```
+kann auch so geschrieben werden:
+
+```swift
+struct Composite<T> {
+    …
+    func compose(other: Composite) -> Composite {
+        return Composite(self, other)
+    }
+}
+```  
+_Begründung:_ Der Verzicht auf redundante Typparameter verdeutlicht den Zweck der Verwendung. Damit wird visuell klargestellt, wann der Rückgabetyp einen anderen Typparameter erwartet.
+
+## Leerzeichen zur Abgrenzung von Operatordefinition
+
+Wenn ein Operator definiert wird, sollte dieser mit Leerzeichen umgeben werden. Anstelle von: 
+
+```swift
+func <|(lhs: Int, rhs: Int) -> Int
+func <|<<A>(lhs: A, rhs: A) -> A
+```
+
+sollte diese Schreibweise verwendet werden:
+
+```swift
+func <| (lhs: Int, rhs: Int) -> Int
+func <|< <A>(lhs: A, rhs: A) -> A
+```
+
+_Begründung:_ Operatoren enthalten Zeichen, die für die Zeichensetzung bestimmt sind. Daduch sind sie nur schwer zu lesen, wenn ihnen ein Zeichen für einen Typ oder eine Parameterliste nachfolgt. Das hinzufügen von Leerzeichen sorgt für einen größeren Abstand und damit einer optischen Abgrenzung.
+
